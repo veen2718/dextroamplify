@@ -71,22 +71,33 @@ def getPathTags(allDict = False):
     allTagPaths1 = recursiveSort(allTagPaths0)
     return allTagPaths1
 
-def getPathTagsPaths():
-    pathTagStructure = getPathTags()
-    pathTagPaths = recursiveTag(pathTagStructure)
-    return pathTagPaths
 
     
-def recursiveTag(tagChildren):
+def getPathTagsPaths(tagChildren=getPathTags()):
     newTagChildren = []
     for tagChild in tagChildren:
         if type(tagChild) == dict:
             tagChildName, tagGrandchildren = dictElement(tagChild)
-            newTagChildren += [f"{tagChildName}/{tagGrandchildName}" for tagGrandchildName in recursiveTag(tagGrandchildren)]
+            newTagChildren += [f"{tagChildName}/{tagGrandchildName}" for tagGrandchildName in getPathTagsPaths(tagGrandchildren)]
         elif type(tagChild == str):
             newTagChildren.append(tagChild)
     return newTagChildren
 
 
+def getChildrenOf(parentTask, endsOnly = False):
+    allPaths = [path.split("/") for path in getPathTagsPaths()]
+    relevantPaths = [path for path in allPaths if parentTask in path]
+    relevantPaths2 =[]
+    for path in relevantPaths:
+        i = path.index(parentTask)
+        relevantPaths2.append(path[:i+2])
+    relevantPaths3 = []
+    for path in relevantPaths2:
+        if path not in relevantPaths3:
+            relevantPaths3.append(path)
+    if endsOnly:
+        return [pathList[-1] for pathList in relevantPaths3]
+    return relevantPaths3
 
 
+    

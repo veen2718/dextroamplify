@@ -8,11 +8,6 @@ class Board:
         self.name=name
         self.content = content
     
-    # def board(self):
-    #     data = []
-    #     for func in self.columnFuncs:
-    #         data.append(func())
-    #     return data
 
 
 class Text:
@@ -24,6 +19,7 @@ class Text:
 class Table:
     def __init__(self, *columns,title=None):
         self.title = title
+        self.columns = columns
 
 class Column:
     def __init__(self, taskFunction,title=None):

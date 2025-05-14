@@ -41,14 +41,12 @@ def filter(dataDict):
 def standard(basePathTag,*pathTagsInput):
     pathTags = [i for i in pathTagsInput] #cloning to avoid errors
     if not pathTags:
-        pass
-    return Table(
-        columns = [
+        pathTags = getChildrenOf(basePathTag, endsOnly=True)
+    return Table([
             Column(
-                lambda: byPathTag(f"{basePathTag}/{pathTag}")
+                lambda: byPathTag(f"{basePathTag}/{pathTag}"),
+                title=pathTag
             )
             for pathTag in pathTags
-        ],
-        title=basePathTag
-    )
+        ], title=basePathTag)
     
