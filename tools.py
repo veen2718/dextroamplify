@@ -34,3 +34,21 @@ def pathJoin(pathA,pathB):
 def dictElement(dictionary):
     key, value = next(iter(dictionary.items()))
     return key,  value
+
+def clearDuplicates(arr):
+    newArr = []
+    for element in arr:
+        if element not in newArr:
+            newArr.append(element)
+    return newArr
+
+def rotate(arr):
+    newArr = []
+    maxLength = max([len(i) for i in arr])
+
+    for i in range(maxLength):
+        row = []
+        for col in arr:
+            row.append(col[i])
+        newArr.append(row)
+    return newArr

@@ -3,6 +3,7 @@ from tools.yamlFrontmatter import *
 from tools.listtools import *
 from tools.jsonFunctions import *
 from .tools import *
+from .config import *
 
 import os
 import re
@@ -54,7 +55,7 @@ def getPathTags(allDict = False):
         for tagPath in allTagPaths:
             if tagPath:
                 pathBases.append(tagPath[0])
-        pathBases = list(set(pathBases))
+        pathBases = clearDuplicates(pathBases)
         newTagPaths = [
             {pathBase:recursiveSort([
                 tagPath[1:] for tagPath in allTagPaths if tagPath and tagPath[0] == pathBase
@@ -87,6 +88,7 @@ def getPathTagsPaths(tagChildren=getPathTags()):
 def getChildrenOf(parentTask, endsOnly = False):
     allPaths = [path.split("/") for path in getPathTagsPaths()]
     relevantPaths = [path for path in allPaths if parentTask in path]
+    # print(relevantPaths)
     relevantPaths2 =[]
     for path in relevantPaths:
         i = path.index(parentTask)

@@ -1,15 +1,19 @@
 from .globals import *
 from .taskfiles import *
 from .boards import *
+from .task import *
+from .read import *
 
-def byPathTag(*pathTags,title=None):
+def byPathTag(*pathTags):
+    # print("byPathTag1", pathTags)
     allPaths = getAllTaskPaths()
     filteredPaths = []
     for path in allPaths:
         taskData = readTask(path)
         if any(pathTag in taskData.get("path-tags",[]) for pathTag in pathTags):
             filteredPaths.append(path)
-    return filteredPaths,title
+    # print("byPathTag2", filteredPaths)
+    return filteredPaths
 
 
 def hasPathTag(*pathTags):
@@ -44,9 +48,21 @@ def standard(basePathTag,*pathTagsInput):
         pathTags = getChildrenOf(basePathTag, endsOnly=True)
     return Table([
             Column(
-                lambda: byPathTag(f"{basePathTag}/{pathTag}"),
+                lambda pathTag=pathTag: byPathTag(f"{basePathTag}/{pathTag}"),
                 title=pathTag
             )
             for pathTag in pathTags
         ], title=basePathTag)
     
+
+if __name__ == "__main__":
+    x =standard("Life Optimizations")
+    for i in x.columns:
+        print(i.title)
+        paths = i.data()
+        # print(len(paths))
+        # print(paths)
+        # print("\n\n")
+
+        taskData = [getTaskData(j) for j in paths]
+        titles = [j["title"] for j in taskData]
