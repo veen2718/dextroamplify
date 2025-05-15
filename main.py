@@ -6,7 +6,7 @@ from .config import *
 
 
 import curses
-from textual.app import App
+from textual.app import App,Binding
 from textual.widgets import Static
 from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
@@ -52,7 +52,7 @@ class KanbanApp(App):
         super().__init__()
     
     def resetConstants(self):
-        self.tab = tabs[self.tabIndex]
+        self.tab = self.tabs[self.tabIndex]
 
         self.xMax = len(self.tab.columns) - 1
         self.yMax = [col.size() -1 for col in self.tab.columns]
@@ -95,6 +95,8 @@ class KanbanApp(App):
         ("left","moveLeft","move left"),
         ("up","moveUp","move up"),
         ("down","moveDown","move down"),
+        Binding("tab", "nextTab", "Next Dashboard",priority=True),
+        Binding("shift+tab", "prevTab", "Previous Dashboard",priority=True),
     ]
 
 
@@ -202,6 +204,28 @@ class KanbanApp(App):
             # self.updateWidget()
             # self.updateWidget(y=self.userY - 1)
     
+    def action_nextTab(self):
+        print("next tab")
+        self.tabIndex = (self.tabIndex + 1) % len(self.tabs)
+        self.resetConstants()
+        self.refresh(recompose=True)
+        # self.call_later(self.switch_dashboard)
+
+    def action_prevTab(self):
+        print("prev tab")
+        self.tabIndex = (self.tabIndex - 1) % len(self.tabs)
+        self.resetConstants()
+        self.refresh(recompose=True)
+        # self.call_later(self.switch_dashboard)
+
+
+
+    # async def switch_dashboard(self):
+    #     await self.view.dock_clear()
+    #     self.widgets = staticArray(self.staticCols())
+    #     verticals = [Vertical(*stCol, classes="column") for stCol in self.widgets.getColumns()]
+    #     await self.view.dock(Horizontal(*verticals))
+    #     self.select()
 
     def updateWidget(self, x=None, y=None):
         if x is None:
@@ -216,7 +240,7 @@ class KanbanApp(App):
 
 
     def compose(self):
-        self.console.log("test")
+        print(f"composing {self.tabIndex}")
         #  yield Horizontal(                   q    # 6. This puts widgets side-by-side
         #     Static("To Do", classes="column"),  # 7. Add a widget with a class name
         #     Static("Doing", classes="column"),
