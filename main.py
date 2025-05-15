@@ -5,11 +5,11 @@ from tools.jsonFunctions import *
 from .config import *
 
 
-import curses
 from textual.app import App,Binding
 from textual.widgets import Static
 from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
+from json import dumps
 
 
 class staticColumn:
@@ -88,6 +88,12 @@ class KanbanApp(App):
             border: round deepskyblue;
             background: #DDB8B8;   
         }
+
+        .taskInfo {
+            border: round red;
+            background: #06022B;
+            width: 2fr;
+        }
     """
 
     BINDINGS = [
@@ -159,6 +165,19 @@ class KanbanApp(App):
         # staticWidget.add_class("de-selected")
         self.refreshStatic(staticWidget)
 
+    def getSelectedTaskAsString(self, x=None, y=None):
+        if x is None:
+            x = self.userX
+        if y is None:
+            y = self.realY(x)
+        
+        taskPath =  self.tab.columns[x].paths()[y]
+        with open(taskPath,"r") as tp:
+            taskString = tp.read()
+
+        return taskString
+
+    
 
     
     def staticCol(self, colX):
@@ -176,6 +195,7 @@ class KanbanApp(App):
             print("X incremented by 1")
             self.select()
             self.deSelect(self.userX -1)
+            self.updateTaskInfo()
     
     def action_moveLeft(self):
         print(f"pos: {self.userX,self.userY,self.realY()}")
@@ -183,6 +203,7 @@ class KanbanApp(App):
             self.userX -= 1
             self.select()
             self.deSelect(self.userX+1)
+            self.updateTaskInfo()
             # self.updateWidget()
             # self.updateWidget(self.userX+1)
     
@@ -192,6 +213,7 @@ class KanbanApp(App):
             self.userY = self.realY() - 1
             self.select()
             self.deSelect(y=self.userY+1)
+            self.updateTaskInfo()
             # self.updateWidget()
             # self.updateWidget(y=self.userY +1)
     
@@ -201,6 +223,7 @@ class KanbanApp(App):
             self.userY += 1
             self.select()
             self.deSelect(y = self.userY -1)
+            self.updateTaskInfo()
             # self.updateWidget()
             # self.updateWidget(y=self.userY - 1)
     
@@ -234,6 +257,9 @@ class KanbanApp(App):
             y = self.realY(x)
 
         self.call_later(self.widgets.get(x,y).update, self.drawText(x,y))
+    
+    def updateTaskInfo(self):
+        self.call_later(self.taskDataStatic.update, self.getSelectedTaskAsString())
 
     def refreshStatic(self,stWidget):
         self.call_later(stWidget.refresh)
@@ -250,13 +276,13 @@ class KanbanApp(App):
         # print(cols)
         
         self.widgets = staticArray(self.staticCols())
-        verticals = [Vertical(*stCol, classes="column") for stCol in self.widgets.getColumns()]
+        self.taskDataStatic = Static(self.getSelectedTaskAsString(),classes="taskInfo")
+        verticals = [Vertical(*stCol, classes="column") for stCol in self.widgets.getColumns()] + [self.taskDataStatic]
 
         # self.widgets = [Static(col, classes="column") for col in cols]
         self.select()
         yield Horizontal(*verticals)
     
-
 
 
 
