@@ -1,8 +1,12 @@
+from .cache import *
+buildTaskCache()
+
 from .task import *
 from .taskfiles import *
 from .filters import *
 from tools.jsonFunctions import *
 from .config import *
+from .data import *
 
 
 from textual.app import App,Binding

@@ -1,8 +1,9 @@
+from .cache import taskCache
+
 from .globals import *
 from .taskfiles import *
 from .boards import *
 from .task import *
-from .read import *
 
 def byPathTag(*pathTags):
     # print("byPathTag1", pathTags)
@@ -64,5 +65,5 @@ if __name__ == "__main__":
         # print(paths)
         # print("\n\n")
 
-        taskData = [getTaskData(j) for j in paths]
+        taskData = [readTask(j) for j in paths]
         titles = [j["title"] for j in taskData]

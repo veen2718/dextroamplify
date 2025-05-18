@@ -1,3 +1,5 @@
+from .cache import taskCache
+
 from .globals import *
 from tools.yamlFrontmatter import *
 from tools.listtools import *
@@ -9,31 +11,24 @@ import os
 import re
 
 def getAllTaskPaths(filesPath=filesPath):
-    allTaskPaths = []
-    for dirPath, dirNames, fileNames in os.walk(filesPath):
-        for file in fileNames:
-            if file.endswith(".md"):
-                filePath = os.path.join(dirPath, file)
-                yaml, md = readFrontmatter(filePath)
-                if yaml:
-                    allTaskPaths.append(filePath)
-    return allTaskPaths
+    return taskCache.keys()
 
 def readTask(path):
-    path = makeToFile(path)
-    yaml, md = readFrontmatter(path)
-    return yaml
+    return taskCache[path]
 
 def writeTask(path, data):
     path = makeToFile(path)
     writeFrontmatter(path, data)
+    taskCache[path] = data
 
 def deleteTaskFile(ID):
     path = shortPath(makeToFile(ID))
     newPath = dataPath(f".trash/tasks/{path}")
     path = dataPath(pathJoin("tasks",path))
     os.rename(path,newPath)
+    taskCache.pop(path, None)
     print(f"deleted {path}\nnewpath: {newPath}")
+
     
     
     
