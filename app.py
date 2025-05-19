@@ -1,6 +1,6 @@
-if __name__ == "__main__":
-    from .cache import *
-    buildTaskCache()
+
+from .cache import *
+buildTaskCache()
 
 from .cache import taskCache
 
@@ -10,12 +10,15 @@ from .filters import *
 from tools.jsonFunctions import *
 from .config import *
 from .data import *
+from .widgets import *
 
-
+from textual import on
 from textual.app import App,Binding
-from textual.widgets import Static, Header, Footer
+from textual.widgets import Static, Header, Footer, Input
 from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
+# from textual.screen import set_focus
+
 from json import dumps
 
 
@@ -81,15 +84,9 @@ class KanbanApp(App):
             width: 1fr;
         }
         .text {
-            # padding-top: 1;
             border: round green;
         }
 
-        # .de-selected {
-        #     white-space: nowrap;
-        #     overflow: hidden;
-        #     text-overflow: ellipsis;
-        # }
 
         .selected {
             border: round deepskyblue;
@@ -101,17 +98,27 @@ class KanbanApp(App):
             background: #06022B;
             width: 2fr;
         }
+
+        .commandPrompt {
+            border: none;
+        }
+
+        .hidden {
+            display: none;
+        }
     """
 
+
     BINDINGS = [
-        ("right","moveRight","move right"),
-        ("left","moveLeft","move left"),
-        ("up","moveUp","move up"),
-        ("down","moveDown","move down"),
+        Binding("right","moveRight","move right"),
+        Binding("left","moveLeft","move left"),
+        Binding("up","moveUp","move up"),
+        Binding("down","moveDown","move down"),
+        Binding("colon","enter_command","Command prompt"),
+        Binding("esc","escaped","Escape"),
         Binding("tab", "nextTab", "Next Dashboard",priority=True),
         Binding("shift+tab", "prevTab", "Previous Dashboard",priority=True),
-    ]
-
+]
 
     def drawn(self):
         print("drawing")
@@ -127,6 +134,14 @@ class KanbanApp(App):
         for colX, col in enumerate(self.tab.columns):
             staticOutputs.append(self.staticCol(colX))
         return staticOutputs
+    
+    def getXY(self, x,y):
+        if x is None:
+            x = self.userX
+        if y is None:
+            y = self.realY(x)
+        return x,y
+
     
     def drawCol(self,x): 
         cols =self.drawn()
@@ -144,39 +159,28 @@ class KanbanApp(App):
     def drawText(self, colX, colY) :
         taskTitle = self.tab.columns[colX].titles()[colY]
         return taskTitle
-        # if (colX, colY) == (self.userX, self.realY()):
-        #     print(colX, colY, "highlighting", taskTitle)
-        #     return f"[reverse]{taskTitle}[/reverse]"
-        # else:
-        #     return taskTitle
+
+
+
 
     def select(self, x=None, y=None):
-        if x is None:
-            x = self.userX
-        if y is None:
-            y = self.realY(x)
+        x,y = self.getXY(x,y)
 
         staticWidget = self.widgets.get(x,y)
-        # staticWidget.remove_class("de-selected")
         staticWidget.add_class("selected")
         self.refreshStatic(staticWidget)
     
     def deSelect(self, x=None, y=None):
-        if x is None:
-            x = self.userX
-        if y is None:
-            y = self.realY(x)
+        x,y = self.getXY(x,y)
 
         staticWidget = self.widgets.get(x,y)
         staticWidget.remove_class("selected")
-        # staticWidget.add_class("de-selected")
         self.refreshStatic(staticWidget)
 
+
+
     def getSelectedTaskAsString(self, x=None, y=None):
-        if x is None:
-            x = self.userX
-        if y is None:
-            y = self.realY(x)
+        x,y = self.getXY(x,y)
         
         taskPath =  self.tab.columns[x].paths()[y]
         with open(taskPath,"r") as tp:
@@ -189,10 +193,18 @@ class KanbanApp(App):
     
     def staticCol(self, colX):
         drawnCol = self.DrawCol(colX)
-        staticTexts = [Static(text,classes="text") for text in drawnCol]
+        staticTexts = [TaskStatic(text,classes="text") for text in drawnCol]
         staticTitle = staticTexts[0]
         staticContent = staticTexts[1:]
         return staticColumn(staticTitle,staticContent)
+
+
+
+
+
+
+
+
 
 
     def action_moveRight(self):
@@ -211,8 +223,6 @@ class KanbanApp(App):
             self.select()
             self.deSelect(self.userX+1)
             self.updateTaskInfo()
-            # self.updateWidget()
-            # self.updateWidget(self.userX+1)
     
     def action_moveUp(self):
         print(f"pos: {self.userX,self.userY,self.realY()}")
@@ -221,8 +231,6 @@ class KanbanApp(App):
             self.select()
             self.deSelect(y=self.userY+1)
             self.updateTaskInfo()
-            # self.updateWidget()
-            # self.updateWidget(y=self.userY +1)
     
     def action_moveDown(self):
         print(f"pos: {self.userX,self.userY,self.realY()}")
@@ -231,31 +239,35 @@ class KanbanApp(App):
             self.select()
             self.deSelect(y = self.userY -1)
             self.updateTaskInfo()
-            # self.updateWidget()
-            # self.updateWidget(y=self.userY - 1)
     
     def action_nextTab(self):
         print("next tab")
         self.tabIndex = (self.tabIndex + 1) % len(self.tabs)
         self.resetConstants()
         self.refresh(recompose=True)
-        # self.call_later(self.switch_dashboard)
 
     def action_prevTab(self):
         print("prev tab")
         self.tabIndex = (self.tabIndex - 1) % len(self.tabs)
         self.resetConstants()
         self.refresh(recompose=True)
-        # self.call_later(self.switch_dashboard)
 
+    def action_enter_command(self):
+        self.commandInputWidget.remove_class("hidden")
+        self.set_focus(self.commandInputWidget)
+        self.ft.add_class("hidden")
+    
 
+    def action_escaped(self):
+        self.hide_command()
+    
+            
+    def hide_command(self):
+        self.commandInputWidget.blur()
+        self.commandInputWidget.add_class("hidden")
+        self.set_focus(None)
+        self.ft.remove_class("hidden")
 
-    # async def switch_dashboard(self):
-    #     await self.view.dock_clear()
-    #     self.widgets = staticArray(self.staticCols())
-    #     verticals = [Vertical(*stCol, classes="column") for stCol in self.widgets.getColumns()]
-    #     await self.view.dock(Horizontal(*verticals))
-    #     self.select()
 
     def updateWidget(self, x=None, y=None):
         if x is None:
@@ -274,24 +286,24 @@ class KanbanApp(App):
 
     def compose(self):
         print(f"composing {self.tabIndex}")
-        #  yield Horizontal(                   q    # 6. This puts widgets side-by-side
-        #     Static("To Do", classes="column"),  # 7. Add a widget with a class name
-        #     Static("Doing", classes="column"),
-        #     Static("Done", classes="column")
-        # )
-        
-        # print(cols)
         
         self.widgets = staticArray(self.staticCols())
         self.taskDataStatic = Static(self.getSelectedTaskAsString(),classes="taskInfo")
         verticals = [Vertical(*stCol, classes="column") for stCol in self.widgets.getColumns()] + [self.taskDataStatic]
 
-        # self.widgets = [Static(col, classes="column") for col in cols]
+        self.commandInputWidget = CommandInput(classes="commandPrompt hidden")
+        self.ft = Footer(id="footer")
+
         self.select()
         yield Header()
         yield Horizontal(*verticals)
-        yield Footer()
+        yield self.commandInputWidget
+        yield self.ft
+
+        self.set_focus(None)
+    
+    
+app = KanbanApp()
 
 if __name__ == "__main__":
-    app = KanbanApp()
     app.run()
