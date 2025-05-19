@@ -86,15 +86,13 @@ class KanbanApp(App):
         x,y = self.getXY(x,y)
 
         staticWidget = self.widgets.get(x,y)
-        staticWidget.add_class("selected")
-        self.refreshStatic(staticWidget)
+        staticWidget.select()
     
     def deSelect(self, x=None, y=None):
         x,y = self.getXY(x,y)
 
         staticWidget = self.widgets.get(x,y)
-        staticWidget.remove_class("selected")
-        self.refreshStatic(staticWidget)
+        staticWidget.deSelect()
 
 
 
@@ -210,8 +208,9 @@ class KanbanApp(App):
         print(f"composing {self.tabIndex}")
         
         self.taskDataStatic = Static(self.getSelectedTaskAsString(),markup=False,classes="taskInfo")
+        print("got task data static")
         self.widgets = TaskArray(self.tab, self.taskDataStatic)
-
+        print(f"got task array")
 
 
 
