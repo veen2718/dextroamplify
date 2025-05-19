@@ -41,10 +41,10 @@ class KanbanApp(App):
 
         super().__init__()
     
-    def resetConstants(self):
+    def resetConstants(self, newX = 0, newY = 0):
         self.tab = self.tabs[self.tabIndex]
-        self.userX = 0
-        self.userY = 0
+        self.userX = newX
+        self.userY = newY
         self.xMax = len(self.tab.columns) - 1
         self.yMax = [col.size() -1 for col in self.tab.columns]
 
@@ -67,23 +67,25 @@ class KanbanApp(App):
         Binding("up","moveUp","move up", priority=True),
         Binding("down","moveDown","move down", priority=True),
         Binding("colon","enter_command","Command prompt"),
+        Binding("space","addTask", "add task", priority=True),
         Binding("tab", "nextTab", "Next Dashboard",priority=True),
         Binding("shift+tab", "prevTab", "Previous Dashboard",priority=True),
 ]
 
 
     def addLog(self, logMsg):
+        print("logging", logMsg)
         self.Logs += "\n" + logMsg
+        self.logStatic.update(self.Logs)
         self.logStatic.refresh()
+        print("refreshed")
 
-    def getXY(self, x,y):
+    def getXY(self, x=None,y=None):
         if x is None:
             x = self.userX
         if y is None:
             y = self.realY(x)
         return x,y
-
-    
 
 
 
@@ -182,20 +184,15 @@ class KanbanApp(App):
         self.addLog(f"switched to tab {self.tabIndex}")
 
     def action_enter_command(self):
-        self.commandInputWidget.remove_class("hidden")
-        self.set_focus(self.commandInputWidget)
-        self.ft.add_class("hidden")
+        self.commandInputWidget.show_command()
+    def action_addTask(self):
+        self.commandInputWidget.show_command(
+            "taskAdd",
+            self.widgets.getCurrentPath()
+            )
     
 
     
-            
-    def hide_command(self):
-        self.commandInputWidget.blur()
-        self.commandInputWidget.add_class("hidden")
-        self.focusCurrentWidget()
-        self.ft.remove_class("hidden")
-
-
     def updateWidget(self, x=None, y=None):
         if x is None:
             x = self.userX

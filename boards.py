@@ -56,5 +56,11 @@ class Column:
     def display(self):
         return Static(f"[b]{self.title}[/b]\n\n" + "\n\n".join(self.titles()),classes="column")
     
+    def indexOf(self, ID):
+        data = self.data()
+        for i, v in enumerate(data):
+            if v["ID"] == ID:
+                return i
+        return -1
 
     

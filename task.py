@@ -1,6 +1,7 @@
 from datetime import datetime
 from .globals import *
 from tools.yamlFrontmatter import *
+from .cache import taskCache
 
 from pathvalidate import sanitize_filename
 
@@ -16,6 +17,7 @@ def makeTask(name,data=dict(),makeFile=False):
     if makeFile:
         filePath = f"{filesPath}/{ID}.md"
         writeFrontmatter(filePath,taskData)
+        taskCache[filePath] = taskData
 
 
     return taskData

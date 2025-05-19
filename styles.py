@@ -30,6 +30,10 @@ CSS = """
     height: 3;
 }
 
+.taskAdd {
+    border: round deepskyblue;
+}
+
 .hidden {
     display: none;
 }

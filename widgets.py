@@ -4,11 +4,13 @@ from textual.scroll_view import ScrollView
 from textual.strip import Strip
 from textual.widget import Widget
 from textual.app import RenderResult
+from textual.message import Message
 
 from rich.segment import Segment
 from rich.text import Text
 
 from .tools import cutText, reducedText, displayableText
+from .task import makeTask
 
 import time
 
@@ -64,24 +66,76 @@ class TaskStatic(Static):
 
 class CommandInput(Input):
     can_focus =True
+    mode = "hidden"
+    taskPath = None
+
+    class Command(Message):
+        def __init__(self, sender, value: str) -> None:
+            super().__init__(sender)
+            self.value = value
+
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        command = event.value.strip()
+        if command:
+            if self.mode == "command":
+                self.app.addLog(f"Command: {command}")
+            elif self.mode == "taskAdd":
+                self.app.addLog(f"adding task {command} to {self.taskPath}")
+                newTask = makeTask(
+                    command,
+                    {"path-tags":[self.taskPath]},
+                    makeFile=True
+                )
+                self.app.widgets.get().addTask(newTask)
+                
+        self.value = ""
+        self.hide_command()
+
 
     def on_key(self, event):
         if event.key == "escape":
             self.value = ""
-            self.app.hide_command()
+            self.hide_command()
             event.stop()
+    
+    def hide_command(self):
+        self.blur()
+        self.add_class("hidden")
+        self.app.focusCurrentWidget()
+        self.app.select()
+        self.app.ft.remove_class("hidden")
+        self.mode = "hidden"
+    
+    def show_command(self,newMode="command",taskPath = None):
+        self.mode = newMode
+        self.remove_class("hidden")
+        self.app.set_focus(self)
+        self.app.ft.add_class("hidden")
+        if newMode == "taskAdd":
+            self.add_class("taskAdd")
+            self.taskPath = taskPath
 
 
 
 class TaskArray(Horizontal):
     def __init__(self, tab,taskDataStatic):
-        self.columns = [TaskColumn(col) for col in tab.columns] 
+        self.columns = [TaskColumn(col) for col in tab.columns]
+        self.tab = tab
 
         super().__init__(*(self.columns + [taskDataStatic]), classes="dashboard")
-    def get(self, x,y=None):
+    
+    def get(self, x=None,y=None):
+        if x is None:
+            x = self.app.userX
         if y is None:
             return self.columns[x]
         return self.columns[x].get(y)
+    
+    def getCurrentPath(self):
+        x, y = self.app.getXY()
+        tabName = self.tab.title
+        colName = self.columns[x].title
+        return f"{tabName}/{colName}"
 
 class TaskColumn(Vertical):
 
@@ -98,6 +152,9 @@ class TaskColumn(Vertical):
     
     def get(self, colY=None):
         return self.contentWidget.get(colY)
+    
+    def addTask(self, newTask):
+        self.contentWidget.addTask(newTask, self.col)
 
 
 
@@ -113,3 +170,14 @@ class TaskColumnContent(VerticalScroll):
             return self.staticContent
         else:
             return self.staticContent[colY]
+    
+    def addTask(self, newTask, col):
+        x, y = self.app.getXY()
+        self.content = col.titles()
+        newID = newTask.get("ID")
+        newIndex = col.indexOf(newID)
+
+        self.call_later(self.remove_children,selector="*")
+        self.staticContent = [TaskStatic(text, classes="text") for text in self.content]
+        self.call_later(self.mount, *self.staticContent)
+        self.app.resetConstants(x, newIndex)
