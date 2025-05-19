@@ -11,6 +11,7 @@ from tools.jsonFunctions import *
 from .config import *
 from .data import *
 from .widgets import *
+from .styles import CSS
 
 from textual import on
 from textual.app import App,Binding
@@ -77,36 +78,7 @@ class KanbanApp(App):
         return self.userY
 
 
-    CSS = """
-        .column {
-            border: round $accent;
-            padding: 1;
-            width: 1fr;
-        }
-        .text {
-            border: round green;
-        }
-
-
-        .selected {
-            border: round deepskyblue;
-            background: #DDB8B8;   
-        }
-
-        .taskInfo {
-            border: round red;
-            background: #06022B;
-            width: 2fr;
-        }
-
-        .commandPrompt {
-            border: none;
-        }
-
-        .hidden {
-            display: none;
-        }
-    """
+    CSS = CSS
 
 
     BINDINGS = [
