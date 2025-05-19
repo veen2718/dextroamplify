@@ -2,8 +2,11 @@ CSS = """
 
 .column {
     border: round $accent;
-    padding: 1;
+    padding-right: 1;
+    padding-left: 1;
     width: 1fr;
+    scrollbar-size-vertical: 1;
+    scrollbar-color: green;
 }
 .text {
     border: round green;
@@ -13,6 +16,7 @@ CSS = """
 .selected {
     border: round deepskyblue;
     background: #DDB8B8;   
+    color: black;
 }
 
 .taskInfo {
@@ -30,8 +34,18 @@ CSS = """
     display: none;
 }
 
+.title {
+    border: round $accent;
+}
+
 .footer {
     height: 3;
     border: round;
 }
+
+.header {
+    height: 3;
+    border: round;
+}
+
 """

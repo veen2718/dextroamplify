@@ -219,7 +219,7 @@ class KanbanApp(App):
         self.ft = Footer(id="footer", classes="footer")
 
         self.select()
-        yield Header()
+        yield Header(classes="header")
         yield self.widgets
         yield self.commandInputWidget
         yield self.ft
