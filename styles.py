@@ -22,10 +22,16 @@ CSS = """
 }
 
 .commandPrompt {
-    border: none;
+    border: round;
+    height: 3;
 }
 
 .hidden {
     display: none;
+}
+
+.footer {
+    height: 3;
+    border: round;
 }
 """

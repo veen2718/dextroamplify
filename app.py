@@ -264,7 +264,7 @@ class KanbanApp(App):
         verticals = [Vertical(*stCol, classes="column") for stCol in self.widgets.getColumns()] + [self.taskDataStatic]
 
         self.commandInputWidget = CommandInput(classes="commandPrompt hidden")
-        self.ft = Footer(id="footer")
+        self.ft = Footer(id="footer", classes="footer")
 
         self.select()
         yield Header()
