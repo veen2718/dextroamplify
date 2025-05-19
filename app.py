@@ -13,45 +13,22 @@ from .data import *
 from .widgets import *
 from .styles import CSS
 
-from textual import on
 from textual.app import App,Binding
-from textual.widgets import Static, Header, Footer, Input
-from textual.containers import Horizontal, Vertical, ScrollableContainer,VerticalScroll
+from textual.widgets import Static, Header, Footer
 from textual.reactive import reactive
-from textual.scroll_view import ScrollView
-# from textual.screen import set_focus
 
 from json import dumps
 
 
-class staticColumn:
-    def __init__(self,title, content):
-        self.title = title
-        self.content = content
-    def get(self, y):
-        return self.content[y]
-    def column(self):
-        return [self.title] +self.content
-
-class staticArray:
-    def __init__(self,columns):
-        self.columns = columns
-    def get(self, x,y=None):
-        if y is None:
-            return self.columns[x]
-        return self.columns[x].get(y)
-    def getColumns(self):
-        return [col.column() for col in self.columns]
     
 
 
 
 class KanbanApp(App):
-    userX = reactive(0)
-    userY = reactive(0)
-    userMode = reactive(0)
 
     def __init__(self,tabs = boards):
+        self.userX = 0
+        self.userY=0
         self.tabs =tabs
         self.tabIndex = 0
         self.tab = tabs[self.tabIndex]
@@ -89,25 +66,10 @@ class KanbanApp(App):
         Binding("up","moveUp","move up", priority=True),
         Binding("down","moveDown","move down", priority=True),
         Binding("colon","enter_command","Command prompt"),
-        Binding("esc","escaped","Escape"),
         Binding("tab", "nextTab", "Next Dashboard",priority=True),
         Binding("shift+tab", "prevTab", "Previous Dashboard",priority=True),
 ]
 
-    def drawn(self):
-        print("drawing")
-        drawnOutputs = [] 
-        for colX, col in enumerate(self.tab.columns):
-            drawnOutputs.append(self.DrawCol(colX))
-            # print(outputString)
-        return drawnOutputs
-    
-    def staticCols(self):
-        print("static")
-        staticOutputs = []
-        for colX, col in enumerate(self.tab.columns):
-            staticOutputs.append(self.staticCol(colX))
-        return staticOutputs
     
     def getXY(self, x,y):
         if x is None:
@@ -117,23 +79,6 @@ class KanbanApp(App):
         return x,y
 
     
-    def drawCol(self,x): 
-        cols =self.drawn()
-        return cols[x]
-    
-    def DrawCol(self,colX):
-        col = self.tab.columns[colX]
-        t = col.title
-        outputs = [f"[b]{t}[/b]"]
-
-        for colY, taskTitle in enumerate(col.titles()):
-            outputs.append(self.drawText(colX, colY))
-        return outputs
-
-    def drawText(self, colX, colY) :
-        taskTitle = self.tab.columns[colX].titles()[colY]
-        return taskTitle
-
 
 
 
@@ -165,12 +110,6 @@ class KanbanApp(App):
     
 
     
-    def staticCol(self, colX):
-        drawnCol = self.DrawCol(colX)
-        staticTexts = [TaskStatic(text,classes="text") for text in drawnCol]
-        staticTitle = staticTexts[0]
-        staticContent = staticTexts[1:]
-        return staticColumn(staticTitle,staticContent)
 
     def currentWidget(self):
         return self.widgets.get(self.userX, self.realY())
@@ -243,16 +182,13 @@ class KanbanApp(App):
         self.ft.add_class("hidden")
     
 
-    def action_escaped(self):
-        self.hide_command()
     
             
     def hide_command(self):
         self.commandInputWidget.blur()
         self.commandInputWidget.add_class("hidden")
-        # self.set_focus(None)
-        self.ft.remove_class("hidden")
         self.focusCurrentWidget()
+        self.ft.remove_class("hidden")
 
 
     def updateWidget(self, x=None, y=None):
@@ -273,35 +209,18 @@ class KanbanApp(App):
     def compose(self):
         print(f"composing {self.tabIndex}")
         
-        self.widgets = staticArray(self.staticCols())
-        self.taskDataStatic = Static(self.getSelectedTaskAsString(),classes="taskInfo")
-        # verticals = [
-        #         TaskColumnScrollView(col.titles(), title=col.title)
-        #         for col in self.tab.columns
-        #     ] + [self.taskDataStatic]
+        self.taskDataStatic = Static(self.getSelectedTaskAsString(),markup=False,classes="taskInfo")
+        self.widgets = TaskArray(self.tab, self.taskDataStatic)
 
-        # verticals = [
-        #     ScrollView(
-        #         Vertical(*stCol),
-        #         classes="column"
-        #     )
-        #     for stCol in self.widgets.getColumns()
-        #     ] + [self.taskDataStatic]
 
-        verticals = [
-            VerticalScroll(
-                *stCol,
-                classes="column"
-            )
-            for stCol in self.widgets.getColumns()
-            ] + [self.taskDataStatic]
+
 
         self.commandInputWidget = CommandInput(classes="commandPrompt hidden")
         self.ft = Footer(id="footer", classes="footer")
 
         self.select()
         yield Header()
-        yield Horizontal(*verticals)
+        yield self.widgets
         yield self.commandInputWidget
         yield self.ft
 
