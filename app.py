@@ -35,6 +35,7 @@ class KanbanApp(App):
 
         self.xMax = len(self.tab.columns) - 1
         self.yMax = [col.size() -1 for col in self.tab.columns]
+        self.Logs = ""
 
 
 
@@ -70,7 +71,11 @@ class KanbanApp(App):
         Binding("shift+tab", "prevTab", "Previous Dashboard",priority=True),
 ]
 
-    
+
+    def addLog(self, logMsg):
+        self.Logs += "\n" + logMsg
+        self.logStatic.refresh()
+
     def getXY(self, x,y):
         if x is None:
             x = self.userX
@@ -166,6 +171,7 @@ class KanbanApp(App):
         self.resetConstants()
         self.refresh(recompose=True)
         self.focusCurrentWidget()
+        self.addLog(f"switched to tab {self.tabIndex}")
 
     def action_prevTab(self):
         print("prev tab")
@@ -173,6 +179,7 @@ class KanbanApp(App):
         self.resetConstants()
         self.refresh(recompose=True)
         self.focusCurrentWidget()
+        self.addLog(f"switched to tab {self.tabIndex}")
 
     def action_enter_command(self):
         self.commandInputWidget.remove_class("hidden")
@@ -208,9 +215,9 @@ class KanbanApp(App):
         print(f"composing {self.tabIndex}")
         
         self.taskDataStatic = Static(self.getSelectedTaskAsString(),markup=False,classes="taskInfo")
-        print("got task data static")
-        self.widgets = TaskArray(self.tab, self.taskDataStatic)
-        print(f"got task array")
+        self.logStatic = Static(self.Logs, classes="log")
+        self.sideBar = Vertical(self.taskDataStatic, self.logStatic, classes="sideBar")
+        self.widgets = TaskArray(self.tab, self.sideBar)
 
 
 

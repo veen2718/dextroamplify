@@ -22,7 +22,7 @@ CSS = """
 .taskInfo {
     border: round red;
     background: #06022B;
-    width: 2fr;
+    # width: 2fr;
 }
 
 .commandPrompt {
@@ -36,6 +36,16 @@ CSS = """
 
 .title {
     border: round $accent;
+}
+
+.log {
+    height: 1fr;
+    border: round red;
+    background: #06022B;
+}
+
+.sideBar {
+    width: 2fr;
 }
 
 .footer {
