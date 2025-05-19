@@ -186,42 +186,43 @@ class KanbanApp(App):
 
 
     def action_moveRight(self):
-        print(f"pos: {self.userX,self.userY,self.realY()}")
+        self.deSelect()
         if 0 <= self.userX < self.xMax:
             self.userX += 1
-            print("X incremented by 1")
-            self.select()
-            self.deSelect(self.userX -1)
-            self.updateTaskInfo()
-            self.focusCurrentWidget()
+        else:
+            self.userX = 0
+        self.afterMove()
     
     def action_moveLeft(self):
-        print(f"pos: {self.userX,self.userY,self.realY()}")
+        self.deSelect()
         if 0 < self.userX <= self.xMax:
             self.userX -= 1
-            self.select()
-            self.deSelect(self.userX+1)
-            self.updateTaskInfo()
-            self.focusCurrentWidget()
+        else:
+            self.userX = self.xMax
+        self.afterMove()
+
     
     def action_moveUp(self):
-        print(f"pos: {self.userX,self.userY,self.realY()}")
+        self.deSelect()
         if 0 < self.userY:
             self.userY = self.realY() - 1
-            self.select()
-            self.deSelect(y=self.userY+1)
-            self.updateTaskInfo()
-            self.focusCurrentWidget()
+        else:
+            self.userY = self.yMax[self.userX]
+        self.afterMove()
     
     def action_moveDown(self):
-        print(f"pos: {self.userX,self.userY,self.realY()}")
-        if self.userY < self.yMax[self.userX]: 
-            self.userY += 1
-            self.select()
-            self.deSelect(y = self.userY -1)
-            self.updateTaskInfo()
-            self.focusCurrentWidget()
-    
+        self.deSelect()
+        if self.userY < self.yMax[self.userX]:
+            self.userY = self.realY() + 1
+        else:
+            self.userY = 0
+        self.afterMove()
+ 
+    def afterMove(self):
+        self.select()
+        self.updateTaskInfo()
+        self.focusCurrentWidget()
+
     def action_nextTab(self):
         print("next tab")
         self.tabIndex = (self.tabIndex + 1) % len(self.tabs)
