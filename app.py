@@ -16,8 +16,9 @@ from .styles import CSS
 from textual import on
 from textual.app import App,Binding
 from textual.widgets import Static, Header, Footer, Input
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal, Vertical, ScrollableContainer,VerticalScroll
 from textual.reactive import reactive
+from textual.scroll_view import ScrollView
 # from textual.screen import set_focus
 
 from json import dumps
@@ -64,7 +65,8 @@ class KanbanApp(App):
     
     def resetConstants(self):
         self.tab = self.tabs[self.tabIndex]
-
+        self.userX = 0
+        self.userY = 0
         self.xMax = len(self.tab.columns) - 1
         self.yMax = [col.size() -1 for col in self.tab.columns]
 
@@ -84,8 +86,8 @@ class KanbanApp(App):
     BINDINGS = [
         Binding("right","moveRight","move right"),
         Binding("left","moveLeft","move left"),
-        Binding("up","moveUp","move up"),
-        Binding("down","moveDown","move down"),
+        Binding("up","moveUp","move up", priority=True),
+        Binding("down","moveDown","move down", priority=True),
         Binding("colon","enter_command","Command prompt"),
         Binding("esc","escaped","Escape"),
         Binding("tab", "nextTab", "Next Dashboard",priority=True),
@@ -170,7 +172,11 @@ class KanbanApp(App):
         staticContent = staticTexts[1:]
         return staticColumn(staticTitle,staticContent)
 
-
+    def currentWidget(self):
+        return self.widgets.get(self.userX, self.realY())
+    
+    def focusCurrentWidget(self):
+        self.set_focus(self.currentWidget())
 
 
 
@@ -187,6 +193,7 @@ class KanbanApp(App):
             self.select()
             self.deSelect(self.userX -1)
             self.updateTaskInfo()
+            self.focusCurrentWidget()
     
     def action_moveLeft(self):
         print(f"pos: {self.userX,self.userY,self.realY()}")
@@ -195,6 +202,7 @@ class KanbanApp(App):
             self.select()
             self.deSelect(self.userX+1)
             self.updateTaskInfo()
+            self.focusCurrentWidget()
     
     def action_moveUp(self):
         print(f"pos: {self.userX,self.userY,self.realY()}")
@@ -203,6 +211,7 @@ class KanbanApp(App):
             self.select()
             self.deSelect(y=self.userY+1)
             self.updateTaskInfo()
+            self.focusCurrentWidget()
     
     def action_moveDown(self):
         print(f"pos: {self.userX,self.userY,self.realY()}")
@@ -211,18 +220,21 @@ class KanbanApp(App):
             self.select()
             self.deSelect(y = self.userY -1)
             self.updateTaskInfo()
+            self.focusCurrentWidget()
     
     def action_nextTab(self):
         print("next tab")
         self.tabIndex = (self.tabIndex + 1) % len(self.tabs)
         self.resetConstants()
         self.refresh(recompose=True)
+        self.focusCurrentWidget()
 
     def action_prevTab(self):
         print("prev tab")
         self.tabIndex = (self.tabIndex - 1) % len(self.tabs)
         self.resetConstants()
         self.refresh(recompose=True)
+        self.focusCurrentWidget()
 
     def action_enter_command(self):
         self.commandInputWidget.remove_class("hidden")
@@ -237,8 +249,9 @@ class KanbanApp(App):
     def hide_command(self):
         self.commandInputWidget.blur()
         self.commandInputWidget.add_class("hidden")
-        self.set_focus(None)
+        # self.set_focus(None)
         self.ft.remove_class("hidden")
+        self.focusCurrentWidget()
 
 
     def updateWidget(self, x=None, y=None):
@@ -261,7 +274,26 @@ class KanbanApp(App):
         
         self.widgets = staticArray(self.staticCols())
         self.taskDataStatic = Static(self.getSelectedTaskAsString(),classes="taskInfo")
-        verticals = [Vertical(*stCol, classes="column") for stCol in self.widgets.getColumns()] + [self.taskDataStatic]
+        # verticals = [
+        #         TaskColumnScrollView(col.titles(), title=col.title)
+        #         for col in self.tab.columns
+        #     ] + [self.taskDataStatic]
+
+        # verticals = [
+        #     ScrollView(
+        #         Vertical(*stCol),
+        #         classes="column"
+        #     )
+        #     for stCol in self.widgets.getColumns()
+        #     ] + [self.taskDataStatic]
+
+        verticals = [
+            VerticalScroll(
+                *stCol,
+                classes="column"
+            )
+            for stCol in self.widgets.getColumns()
+            ] + [self.taskDataStatic]
 
         self.commandInputWidget = CommandInput(classes="commandPrompt hidden")
         self.ft = Footer(id="footer", classes="footer")
