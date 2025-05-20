@@ -23,12 +23,12 @@ class TaskStatic(Static):
         return inner
     
     def __init__(
-        self,
-        text: str,
-        *,
-        id = None,
-        classes = None,
-    ):
+            self,
+            text: str,
+            *,
+            id = None,
+            classes = None,
+        ):
         self.text = text 
         self.selected = False
         super().__init__(text, id=id, classes=classes)
@@ -63,6 +63,8 @@ class TaskStatic(Static):
         self.selected = False
         self._wrap_text()
         self.refresh()
+
+
 
 class CommandInput(Input):
     can_focus =True
@@ -136,6 +138,11 @@ class TaskArray(Horizontal):
         tabName = self.tab.title
         colName = self.columns[x].title
         return f"{tabName}/{colName}"
+    
+    def resetColumn(self,x=None):
+        if x is None:
+            x, y = self.app.getXY()
+        self.columns[x].resetContent()
 
 class TaskColumn(Vertical):
 
@@ -155,6 +162,9 @@ class TaskColumn(Vertical):
     
     def addTask(self, newTask):
         self.contentWidget.addTask(newTask, self.col)
+    
+    def resetContent(self):
+        self.contentWidget.reset()
 
 
 
@@ -176,8 +186,24 @@ class TaskColumnContent(VerticalScroll):
         self.content = col.titles()
         newID = newTask.get("ID")
         newIndex = col.indexOf(newID)
+        self.reset(x, newIndex)
 
+    
+    def syncData(self):
+        parent = self.parent
+        grandParent = parent.parent
+        parentSiblings = list(grandParent.children)
+        selfIndex = parentSiblings.index(parent)
+        self.content = self.app.tab.get(selfIndex).titles()
+
+
+    def reset(self, x=None, y=None):
+        self.syncData()
+        x, y = self.app.getXY(x, y)
         self.call_later(self.remove_children,selector="*")
         self.staticContent = [TaskStatic(text, classes="text") for text in self.content]
         self.call_later(self.mount, *self.staticContent)
-        self.app.resetConstants(x, newIndex)
+        self.app.resetConstants(x, y)
+
+
+

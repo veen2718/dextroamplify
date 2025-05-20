@@ -37,6 +37,11 @@ class Table:
 
         arr2 = [col + [" "]*(maxLength-len(col)) for col in arr]
         return rotate(arr2)
+    def get(self, x,y=None):
+        if y is None:
+            return self.columns[x]
+        else:
+            return self.columns[x].data()[y]
 
 
 class Column:

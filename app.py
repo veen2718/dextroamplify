@@ -68,6 +68,7 @@ class KanbanApp(App):
         Binding("down","moveDown","move down", priority=True),
         Binding("colon","enter_command","Command prompt"),
         Binding("space","addTask", "add task", priority=True),
+        Binding("delete","deleteSelected", "delete", priority=True),
         Binding("tab", "nextTab", "Next Dashboard",priority=True),
         Binding("shift+tab", "prevTab", "Previous Dashboard",priority=True),
 ]
@@ -86,6 +87,16 @@ class KanbanApp(App):
         if y is None:
             y = self.realY(x)
         return x,y
+
+    def action_deleteSelected(self):
+        selectedTask = self.currentTask()
+        
+        selectedID = selectedTask["ID"]
+        selectedTitle = selectedTask["title"]
+        deleteTaskFile(selectedID)
+        self.widgets.resetColumn()
+        self.select()
+        self.addLog(f"deleted task {selectedTitle}")
 
 
 
@@ -114,7 +125,9 @@ class KanbanApp(App):
 
     
 
-    
+    def currentTask(self):
+        x, y = self.getXY()
+        return self.tab.get(x, y)
 
     def currentWidget(self):
         return self.widgets.get(self.userX, self.realY())
