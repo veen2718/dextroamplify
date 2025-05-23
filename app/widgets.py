@@ -1,3 +1,6 @@
+from backend.utils import cutText, reducedText, displayableText
+from files.task import makeTask
+
 from textual.widgets import Static, Input
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.scroll_view import ScrollView
@@ -5,12 +8,9 @@ from textual.strip import Strip
 from textual.widget import Widget
 from textual.app import RenderResult
 from textual.message import Message
-
 from rich.segment import Segment
 from rich.text import Text
 
-from .tools import cutText, reducedText, displayableText
-from .task import makeTask
 
 import time
 

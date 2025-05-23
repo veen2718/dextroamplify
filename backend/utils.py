@@ -1,4 +1,4 @@
-from .globals import *
+from data.globals import *
 
 def makeToFile(path): #takes either a filename or ID, if filename it returns it, otherwise it adds .md 
     if not path.endswith(".md"):

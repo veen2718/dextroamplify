@@ -1,7 +1,7 @@
-from .taskfiles import *
-from .tools import *
-from textual.app import App
+from files.taskfiles import *
+from backend.utils import *
 
+from textual.app import App
 from textual.widgets import Static
 from textual.containers import Horizontal
 

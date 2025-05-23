@@ -1,17 +1,19 @@
 
-from .cache import *
+from backend.cache import *
 buildTaskCache()
 
-from .cache import taskCache
-
-from .task import *
-from .taskfiles import *
-from .filters import *
-from tools.jsonFunctions import *
-from .config import *
-from .data import *
 from .widgets import *
 from .styles import CSS
+
+from backend.cache import taskCache
+from backend.filters import *
+
+from files.task import *
+from files.taskfiles import *
+from data.config import *
+from data.data import *
+
+from veenTools.jsonFunctions import *
 
 from textual.app import App,Binding
 from textual.widgets import Static, Header, Footer

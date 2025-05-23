@@ -1,0 +1,6 @@
+textual
+textual-dev
+textual-serve
+rich
+PyYAML
+pathvalidate

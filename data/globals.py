@@ -1,4 +1,4 @@
-from .config import *
+from data.config import *
 
 from datetime import datetime
 

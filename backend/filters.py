@@ -1,9 +1,9 @@
-from .cache import taskCache
+from backend.cache import taskCache
 
-from .globals import *
-from .taskfiles import *
-from .boards import *
-from .task import *
+from data.globals import *
+from files.taskfiles import *
+from backend.boards import *
+from files.task import *
 
 def byPathTag(*pathTags):
     # print("byPathTag1", pathTags)
