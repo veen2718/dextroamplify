@@ -4,6 +4,7 @@ from data.globals import *
 from files.taskfiles import *
 from backend.boards import *
 from files.task import *
+from dashboards.tableBoard import tableBoard
 
 def byPathTag(*pathTags):
     # print("byPathTag1", pathTags)
@@ -43,11 +44,11 @@ def filter(dataDict):
 
 
 
-def standard(basePathTag,*pathTagsInput):
+def standardTable(basePathTag,*pathTagsInput):
     pathTags = [i for i in pathTagsInput] #cloning to avoid errors
     if not pathTags:
         pathTags = getChildrenOf(basePathTag, endsOnly=True)
-    return Table([
+    return tableBoard([
             Column(
                 lambda pathTag=pathTag: byPathTag(f"{basePathTag}/{pathTag}"),
                 title=pathTag
