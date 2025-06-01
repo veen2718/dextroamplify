@@ -8,7 +8,6 @@ class Node:
     def __init__(self, name, chain):
         self.name = name
         self.chain =chain
-        # print(self.name)
         
         self.parent = None
         self.children =[]
@@ -24,6 +23,12 @@ class Node:
         for child in self.children:
             child.display1()
     
+    def path(self):
+        if self.name:
+            if self.parent.name:
+                return f"{self.parent.path()}/{self.name}"
+            return self.name
+    
 
 
 class chain:
@@ -31,6 +36,26 @@ class chain:
         self.nodes = []
     def getTop(self):
         return [n for n in self.nodes if n.parent is None][0]
+    
+    def sortTopLevel(self):
+        currentNodes = self.getTop().children
+        allNodesSorted = []
+        while currentNodes:
+            nextNodes = []
+            for i in currentNodes:
+                allNodesSorted.append(i)
+                nextNodes += i.children
+            currentNodes = nextNodes
+        return allNodesSorted
+    
+    def getFilteredBy(self,filterValue):
+        nodes = self.sortTopLevel()
+        for node in nodes:
+            if node.name == filterValue or (node.name == filterValue.split("/")[-1] and node.path().endswith(filterValue)):
+                return node
+
+
+
 
 def buildChain(pathDict,chainObject = None,parentNode = None):
     topNode = False
@@ -51,3 +76,8 @@ def buildChain(pathDict,chainObject = None,parentNode = None):
     else:
         return currentNode
 
+def getPathTagNodes():
+    x = getPathTags(allDict=True)
+    x2 = {None:x}
+    return buildChain(x2)
+    
