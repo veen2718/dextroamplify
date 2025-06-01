@@ -1,3 +1,6 @@
+if __name__ == "__main__":
+    from .cache import buildTaskCache
+    buildTaskCache()
 from backend.cache import taskCache
 
 from data.globals import *
@@ -57,14 +60,8 @@ def standardTable(basePathTag,*pathTagsInput):
         ], title=basePathTag)
     
 
-if __name__ == "__main__":
-    x =standard("Life Optimizations")
-    for i in x.columns:
-        print(i.title)
-        paths = i.data()
-        # print(len(paths))
-        # print(paths)
-        # print("\n\n")
-
-        taskData = [readTask(j) for j in paths]
-        titles = [j["title"] for j in taskData]
+if __name__ == "__main__": 
+    x = getChildrenOf("Keyboarding")
+    print(x)
+    print(getPathTags())
+    print(getPathTagsPaths())

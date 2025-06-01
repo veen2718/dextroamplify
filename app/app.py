@@ -36,20 +36,16 @@ class KanbanApp(App):
         self.Logs = ""
 
         super().__init__()
-    # BINDINGS =[]
+
     def tabSet(self, n=0,draw=True):
         print("tab setting")
         self.tabIndex = (self.tabIndex + n) % len(self.tabs)
         self.tab = self.tabs[self.tabIndex] 
         self.tab.app = self
         self.tab.resetPosition()
-        # self.tab.setMax()
         self.syncActions(keyBindings)
         self.tab.composeWidgets()
 
-        # self.BINDINGS = self.tab.getBindings()
-        # print(self.BINDINGS)
-        # self.reBind()
         if draw:
             self.tab.reDraw()
 

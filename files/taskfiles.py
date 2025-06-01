@@ -94,7 +94,7 @@ def getChildrenOf(parentTask, endsOnly = False):
         if path not in relevantPaths3:
             relevantPaths3.append(path)
     if endsOnly:
-        return [pathList[-1] for pathList in relevantPaths3]
+        return [pathList[-1] for pathList in relevantPaths3 if len(pathList) > 1]
     return relevantPaths3
 
 

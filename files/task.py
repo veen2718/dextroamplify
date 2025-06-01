@@ -1,5 +1,6 @@
 from data.globals import *
 from backend.cache import taskCache
+from .taskfiles import readTask
 
 from veenTools.yamlFrontmatter import *
 
@@ -22,4 +23,16 @@ def makeTask(name,data=dict(),makeFile=False):
 
 
     return taskData
+
+class taskObject:
+
+    def __init__(self, taskPath):
+        self.path = taskPath
+        self.data = readTask(taskPath)
+    
+    def get(self,x):
+        return self.data.get(x)
+
+    def isTerminal(self):
+        children = getChildrenOf(self.get("title"))
     

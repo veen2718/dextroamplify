@@ -71,6 +71,15 @@ class CommandInput(Input):
     mode = "hidden"
     taskPath = None
 
+    def __init__(
+        self,
+        *,
+        id = None,
+        classes = None,
+    ):
+        self.tab = self.app.tab
+        super().__init__(id=id,classes=classes)
+
     class Command(Message):
         def __init__(self, sender, value: str) -> None:
             super().__init__(sender)
@@ -129,7 +138,7 @@ class TaskArray(Horizontal):
     
     def get(self, x=None,y=None):
         if x is None:
-            x = self.app.userX
+            x = self.tab.userX
         if y is None:
             return self.columns[x]
         return self.columns[x].get(y)
@@ -157,6 +166,7 @@ class TaskColumn(Vertical):
             self.contentWidget,
             classes="outerColumn"
         )
+        self.tab = self.app.tab
     
     def get(self, colY=None):
         return self.contentWidget.get(colY)
@@ -175,6 +185,7 @@ class TaskColumnContent(VerticalScroll):
         self.content = colData
         self.staticContent = [TaskStatic(text, classes="text") for text in colData]
         super().__init__(*self.staticContent,classes="column")
+        self.tab = self.app.tab
     
     def get(self, colY=None):
         if colY is None:
